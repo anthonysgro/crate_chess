@@ -1,3 +1,4 @@
+// board.rs
 use crate::pieces::{ChessPiece, Piece, Color};
 
 pub struct Board {
@@ -43,15 +44,48 @@ impl Board {
         Board { squares: board }
     }
 
-    pub fn display(&self) {
-        for row in &self.squares {
+    pub fn pretty_print(&self) {
+        println!(" +------------------------+");
+        for (i, row) in self.squares.iter().enumerate() {
+            print!("{}|", 8 - i); // Row numbers
             for square in row {
                 match square {
-                    Some(piece) => print!("{:?} ", piece.piece_type),
-                    None => print!("Empty "),
+                    Some(piece) => print!(" {:<2}", self.piece_to_unicode(piece)),
+                    None => print!(" . "),
                 }
             }
-            println!();
+            println!("|");
+        }
+        println!(" +------------------------+");
+        println!("   a  b  c  d  e  f  g  h");
+    }
+
+    fn piece_to_unicode(&self, piece: &ChessPiece) -> char {
+        match piece.piece_type {
+            Piece::King => match piece.color {
+                Color::White => '♔',
+                Color::Black => '♚',
+            },
+            Piece::Queen => match piece.color {
+                Color::White => '♕',
+                Color::Black => '♛',
+            },
+            Piece::Rook => match piece.color {
+                Color::White => '♖',
+                Color::Black => '♜',
+            },
+            Piece::Bishop => match piece.color {
+                Color::White => '♗',
+                Color::Black => '♝',
+            },
+            Piece::Knight => match piece.color {
+                Color::White => '♘',
+                Color::Black => '♞',
+            },
+            Piece::Pawn => match piece.color {
+                Color::White => '♙',
+                Color::Black => '♟',
+            },
         }
     }
 }

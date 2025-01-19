@@ -25,5 +25,5 @@ impl ChessPiece {
         ChessPiece { piece_type, color }
     }
 
-    // You can later add movement rules or other logic here if needed
+    // TODO: Add movement rules and piece functionality here
 }
