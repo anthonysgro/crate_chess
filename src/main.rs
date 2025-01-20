@@ -7,7 +7,7 @@ mod castling_rights;
 mod tile;
 
 fn main() {
-    let fen = "1k6/6p1/8/8/8/8/4p3/1K3N2 b - - 0 1";
+    let fen = "1k5N/8/4P3/8/8/5P2/8/1K6 w - - 0 1";
 
     // Create a new Chess game with a board from the provided FEN string
     let game = chess::Chess::from_fen(fen);

@@ -51,7 +51,6 @@ impl ChessPiece {
 
         if board.is_on_board(x, one_row_forward) {
             let destination_tile = *board.get_tile(x, one_row_forward);
-
             if !destination_tile.is_occupied() {
                 if (self.color == Color::White && y == 6) || (self.color == Color::Black && y == 1) {
                     // Promotion
@@ -147,9 +146,30 @@ impl ChessPiece {
 
     fn get_knight_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
         let mut moves: Vec<Move>= Vec::new();
-        moves
+        let (x, y) = origin_tile.get_coords();
 
-        // Knight-specific move logic
+        // Possible L-shaped moves (8 possible moves)
+        let knight_moves = [
+            (2, 1), (2, -1), (-2, 1), (-2, -1),
+            (1, 2), (1, -2), (-1, 2), (-1, -2)
+        ];
+
+        for &(dx, dy) in &knight_moves {
+            let new_x = (x as isize + dx) as usize;
+            let new_y = (y as isize + dy) as usize;
+
+            // Check if the move is on the board
+            if board.is_on_board(new_x, new_y) {
+                let destination_tile = board.get_tile(new_x, new_y);
+
+                // If the destination tile is empty or contains an opponent's piece
+                if !destination_tile.is_occupied() || destination_tile.piece.unwrap().color != self.color {
+                    let knight_move = Move::new(origin_tile, *destination_tile, *self, None);
+                    moves.push(knight_move);
+                }
+            }
+        }
+        moves
     }
 
     fn get_rook_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
