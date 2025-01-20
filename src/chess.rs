@@ -43,7 +43,7 @@ impl Chess {
     pub fn from_fen(fen: &str) -> Self {
         let fen: Fen = Fen::from_fen(fen);
         
-        let board = Board::from_fen(&fen.board, &fen.en_passant);
+        let board = Board::from_fen(&fen.board);
         Chess {
             board,
             turn: match &fen.turn {

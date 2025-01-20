@@ -109,7 +109,7 @@ impl Board {
         Self { position: board.position }
     }
 
-    pub fn from_fen(fen_board: &str, fen_en_passant: &str) -> Self {
+    pub fn from_fen(fen_board: &str) -> Self {
         let mut board: Board = Self::init();
     
         let rows: Vec<&str> = fen_board.split('/').collect();
@@ -152,10 +152,6 @@ impl Board {
                     col += 1;
                 }
             }
-        }
-
-        if (fen_en_passant != "-") {
-            board.get_tile_with_name_mut(fen_en_passant).set_en_passant_available(true);
         }
 
         board

@@ -38,7 +38,6 @@ impl fmt::Display for TileName {
 #[derive(Debug, Clone, Copy)]
 pub struct Tile {
     pub piece: Option<ChessPiece>,
-    pub en_passant_available: bool,
     pub name: TileName,
 }
 
@@ -46,17 +45,8 @@ impl Tile {
     pub fn new(piece: Option<ChessPiece>, name: &str) -> Self {
         Tile {
             piece,
-            en_passant_available: false,
             name: TileName::new(name),
         }
-    }
-
-    pub fn set_en_passant_available(&mut self, is_en_passant_target_suare: bool) {
-        self.en_passant_available = is_en_passant_target_suare;
-    }
-
-    pub fn is_en_passant_available(&self) -> bool {
-        self.en_passant_available
     }
 
     pub fn is_occupied(&self) -> bool {
@@ -83,9 +73,8 @@ impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "Tile {{ piece: {:?}, en_passant_available: {}, name: {} }}", 
+            "Tile {{ piece: {:?}, name: {} }}", 
           self.piece, 
-          self.en_passant_available,
           self.name
         )
     }
