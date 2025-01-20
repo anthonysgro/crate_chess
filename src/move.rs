@@ -1,31 +1,15 @@
-use crate::pieces::Piece;
+use crate::{pieces::ChessPiece, tile::Tile};
 
+#[derive(Debug, Clone, Copy)]
 pub struct Move {
-    pub from: (usize, usize),
-    pub to: (usize, usize),
-    pub promotion: Option<Piece>,
+    pub from: Tile,
+    pub to: Tile,
+    pub piece: ChessPiece,
+    pub promotion: Option<ChessPiece>,
 }
 
 impl Move {
-    pub fn from_algebraic_notation(input: &str) -> Option<Self> {
-        let from_file = input.chars().nth(0)?;
-        let from_rank = input.chars().nth(1)?;
-        let to_file = input.chars().nth(2)?;
-        let to_rank: char = input.chars().nth(3)?;
-
-        let from = (
-            8 - from_rank.to_digit(10)? as usize,
-            (from_file as u8 - b'a') as usize,
-        );
-        let to = (
-            8 - to_rank.to_digit(10)? as usize,
-            (to_file as u8 - b'a') as usize,
-        );
-
-        Some(Move {
-            from,
-            to,
-            promotion: None,
-        })
+    pub fn new(from: Tile, to: Tile, piece: ChessPiece, promotion: Option<ChessPiece>) -> Self {
+        Self { from, to, piece, promotion }
     }
 }

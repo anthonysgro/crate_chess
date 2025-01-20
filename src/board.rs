@@ -54,6 +54,9 @@ impl Board {
         &mut self.position[Self::index(x, y)]
     }
 
+    pub fn is_on_board(&self, x: usize, y: usize) -> bool {
+        x < 8 && y < 8
+    }
 
     // Initialize the board with empty tiles and proper names
     pub fn init() -> Self {
@@ -151,7 +154,9 @@ impl Board {
             }
         }
 
-        board.get_tile_with_name_mut(fen_en_passant).set_en_passant_available(true);
+        if (fen_en_passant != "-") {
+            board.get_tile_with_name_mut(fen_en_passant).set_en_passant_available(true);
+        }
 
         board
     }
