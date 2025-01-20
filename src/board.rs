@@ -164,7 +164,7 @@ impl Board {
 
 
     pub fn pretty_print(&self) {
-        println!(" +------------------------+");
+        println!("  +------------------------+");
         for y in (0..8).rev() { // Print from row 8 down to row 1
             print!("{} |", y + 1); // Row numbers
             for x in 0..8 {
@@ -177,8 +177,8 @@ impl Board {
             }
             println!("|");
         }
-        println!(" +------------------------+");
-        println!("   a  b  c  d  e  f  g  h"); // Column labels
+        println!("  +------------------------+");
+        println!("    a  b  c  d  e  f  g  h"); // Column labels
     }
 
     fn piece_to_unicode(&self, piece: &ChessPiece) -> char {

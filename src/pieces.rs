@@ -174,9 +174,45 @@ impl ChessPiece {
 
     fn get_rook_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
         let mut moves: Vec<Move>= Vec::new();
-        moves
+        let (x, y) = origin_tile.get_coords();
 
-        // Rook-specific move logic
+        // Horizontal and Vertical Directions
+        let directions: [(isize, isize); 4] = [
+            (1, 0),   // Right
+            (-1, 0),  // Left
+            (0, 1),   // Down
+            (0, -1),  // Up
+        ];
+
+        for (dx, dy) in directions.iter() {
+            let mut new_x = x as isize;
+            let mut new_y = y as isize;
+
+            // Move in the current direction until hitting the edge or another piece
+            loop {
+                new_x += dx;
+                new_y += dy;
+
+                if !board.is_on_board(new_x as usize, new_y as usize) {
+                    break;
+                }
+
+                let destination_tile = board.get_tile(new_x as usize, new_y as usize);
+
+                if destination_tile.is_occupied() {
+                    if destination_tile.piece.unwrap().color != self.color {
+                        let rook_move = Move::new(origin_tile, *destination_tile, *self, None);
+                        moves.push(rook_move);
+                    }
+                    break;
+                } else {
+                    let rook_move = Move::new(origin_tile, *destination_tile, *self, None);
+                    moves.push(rook_move);
+                }
+            }
+        }
+
+        moves
     }
 
     fn get_bishop_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
