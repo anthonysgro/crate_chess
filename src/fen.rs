@@ -10,7 +10,6 @@ pub struct Fen {
 }
 
 impl Fen {
-    // Function to create a new Fen object from a FEN string
     pub fn from_fen(fen: &str) -> Self {
         let parts: Vec<&str> = fen.split_whitespace().collect();
         if parts.len() != 6 {
@@ -34,7 +33,6 @@ impl Fen {
         }
     }
 
-    // Function to convert the Fen struct back to a FEN string
     pub fn to_fen(&self) -> String {
         format!(
             "{} {} {} {} {} {}",

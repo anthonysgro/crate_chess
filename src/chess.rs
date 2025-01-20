@@ -78,11 +78,11 @@ impl Chess {
         let mut legal_moves = Vec::new();
 
         // Iterate over all tiles and find pieces of the correct color
-        for tile in self.board.position {
+        for tile in self.board.position.iter() {
             if let Some(piece) = &tile.piece {
                 if piece.color == self.turn {
                     // Get possible moves for the piece on this tile
-                    let possible_moves = piece.get_possible_moves(tile, &self.board);
+                    let possible_moves = piece.get_possible_moves(*tile, &self.board, self.castling_rights);
                     
                     // let possible_moves = piece.get_possible_moves(self, *piece, tile);
                     legal_moves.extend(possible_moves);

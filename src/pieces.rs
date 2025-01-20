@@ -1,4 +1,5 @@
 use crate::board::Board;
+use crate::castling_rights::CastlingRights;
 use crate::r#move::Move;
 use crate::tile::Tile;
 
@@ -29,14 +30,14 @@ impl ChessPiece {
         ChessPiece { piece_type, color }
     }
 
-    pub fn get_possible_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
+    pub fn get_possible_moves(&self, origin_tile: Tile, board: &Board, castling_rights: CastlingRights) -> Vec<Move> {
         match self.piece_type {
             Piece::Pawn => self.get_pawn_moves(origin_tile, board),
             Piece::Knight => self.get_knight_moves(origin_tile, board),
             Piece::Rook => self.get_rook_moves(origin_tile, board),
             Piece::Bishop => self.get_bishop_moves(origin_tile, board),
             Piece::Queen => self.get_queen_moves(origin_tile, board),
-            Piece::King => self.get_king_moves(origin_tile, board),
+            Piece::King => self.get_king_moves(origin_tile, board, castling_rights),
         }
     }
 
@@ -263,14 +264,105 @@ impl ChessPiece {
         moves.extend(self.get_rook_moves(origin_tile, board));
         moves.extend(self.get_bishop_moves(origin_tile, board));
         moves
-
-        // Queen-specific move logic
     }
 
-    fn get_king_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
+    fn get_king_moves(&self, origin_tile: Tile, board: &Board, castling_rights: CastlingRights) -> Vec<Move> {
         let mut moves: Vec<Move>= Vec::new();
-        moves
+        let (x, y) = origin_tile.get_coords();
 
-        // King-specific move logic
+        // The King can move one square in any direction
+        let directions: [(isize, isize); 8] = [
+            (1, 0),
+            (-1, 0),
+            (0, 1),
+            (0, -1),
+            (1, 1),
+            (-1, 1),
+            (1, -1),
+            (-1, -1),
+        ];
+
+        for (dx, dy) in directions.iter() {
+            let new_x = x as isize + dx;
+            let new_y = y as isize + dy;
+
+            // Check if the move is on the board
+            if !board.is_on_board(new_x as usize, new_y as usize) {
+                continue;
+            }
+
+            let destination_tile = board.get_tile(new_x as usize, new_y as usize);
+            if !destination_tile.is_occupied() {
+                // Empty tile, king can move here
+                let king_move = Move::new(origin_tile, *destination_tile, *self, None);
+                moves.push(king_move);
+            } else if destination_tile.piece.unwrap().color != self.color {
+                // Capture an enemy piece
+                let king_move = Move::new(origin_tile, *destination_tile, *self, None);
+                moves.push(king_move);
+            }
+        }
+
+        // Castling logic
+        match self.color {
+            Color::White => {
+                println!("King white castling");
+                // Kingside castling
+                if castling_rights.white_king_side {
+                    println!("White kingside castle");
+                    let rook_tile = board.get_tile(7, y);
+                    if rook_tile.is_occupied() {
+                        // Check if the squares between the king and rook are empty
+                        let square_5 = *board.get_tile(5, y);
+                        let square_6 = *board.get_tile(6, y);
+                        if !square_5.is_occupied() && !square_6.is_occupied() {
+                            moves.push(Move::new(origin_tile, square_6, *self, None)); // Castling move
+                        }
+                    }
+                }
+
+                // Queenside castling
+                if castling_rights.white_queen_side {
+                    let rook_tile = board.get_tile(0, y);
+                    if rook_tile.is_occupied() {
+                        // Check if the squares between the king and rook are empty
+                        let square_1 = *board.get_tile(1, y);
+                        let square_2 = *board.get_tile(2, y);
+                        let square_3 = *board.get_tile(3, y);
+                        if !square_1.is_occupied() && !square_2.is_occupied() && !square_3.is_occupied() {
+                            moves.push(Move::new(origin_tile, square_2, *self, None)); // Castling move
+                        }
+                    }
+                }
+            }
+            Color::Black => {
+                // Kingside castling
+                if castling_rights.black_king_side {
+                    let rook_tile = board.get_tile(7, y);
+                    if rook_tile.is_occupied() {
+                        let square_5 = *board.get_tile(5, y);
+                        let square_6 = *board.get_tile(6, y);
+                        if !square_5.is_occupied() && !square_6.is_occupied() {
+                            moves.push(Move::new(origin_tile, square_6, *self, None)); // Castling move
+                        }
+                    }
+                }
+
+                // Queenside castling
+                if castling_rights.black_queen_side {
+                    let rook_tile = board.get_tile(0, y);
+                    if rook_tile.is_occupied() {
+                        let square_1 = *board.get_tile(1, y);
+                        let square_2 = *board.get_tile(2, y);
+                        let square_3 = *board.get_tile(3, y);
+                        if !square_1.is_occupied() && !square_2.is_occupied() && !square_3.is_occupied() {
+                            moves.push(Move::new(origin_tile, square_2, *self, None)); // Castling move
+                        }
+                    }
+                }
+            }
+        }
+
+        moves
     }
 }
