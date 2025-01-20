@@ -1,14 +1,16 @@
-// main.rs
 mod pieces;
 mod board;
 mod r#move;
+mod chess;
 
 fn main() {
-    // let board = board::Board::new();
+    let fen = "r1bqk2r/ppp2ppp/2nb4/1B1np3/4P3/2N2N2/PP1P1PPP/R1BQK2R b KQkq - 0 7";
 
-    // let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    let fen = "r1bqk2r/ppp2ppp/2nb4/1B1np3/8/2N1PN2/PP1P1PPP/R1BQK2R w KQkq - 4 7";
-    let board = board::Board::from_fen(fen);
+    // Create a new Chess game with a board from the provided FEN string
+    let game = chess::Chess::from_fen(fen);
 
-    board.pretty_print(); // Show the initial setup
+    // Print the board to verify the setup
+    game.board.pretty_print();
+
+    println!("Turn: {:?}", game.get_turn());
 }

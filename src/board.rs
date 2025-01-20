@@ -9,37 +9,37 @@ impl Board {
     pub fn new() -> Self {
         let mut board = vec![vec![None; 8]; 8]; // 8x8 chess board
 
-        // Set up initial pieces
-        for i in 0..8 {
-            board[1][i] = Some(ChessPiece::new(Piece::Pawn, Color::White)); // White pawns
-            board[6][i] = Some(ChessPiece::new(Piece::Pawn, Color::Black)); // Black pawns
-        }
+        // // Set up initial pieces
+        // for i in 0..8 {
+        //     board[1][i] = Some(ChessPiece::new(Piece::Pawn, Color::White)); // White pawns
+        //     board[6][i] = Some(ChessPiece::new(Piece::Pawn, Color::Black)); // Black pawns
+        // }
 
-        // Set up rooks
-        board[0][0] = Some(ChessPiece::new(Piece::Rook, Color::White));
-        board[0][7] = Some(ChessPiece::new(Piece::Rook, Color::White));
-        board[7][0] = Some(ChessPiece::new(Piece::Rook, Color::Black));
-        board[7][7] = Some(ChessPiece::new(Piece::Rook, Color::Black));
+        // // Set up rooks
+        // board[0][0] = Some(ChessPiece::new(Piece::Rook, Color::White));
+        // board[0][7] = Some(ChessPiece::new(Piece::Rook, Color::White));
+        // board[7][0] = Some(ChessPiece::new(Piece::Rook, Color::Black));
+        // board[7][7] = Some(ChessPiece::new(Piece::Rook, Color::Black));
 
-        // Set up knights
-        board[0][1] = Some(ChessPiece::new(Piece::Knight, Color::White));
-        board[0][6] = Some(ChessPiece::new(Piece::Knight, Color::White));
-        board[7][1] = Some(ChessPiece::new(Piece::Knight, Color::Black));
-        board[7][6] = Some(ChessPiece::new(Piece::Knight, Color::Black));
+        // // Set up knights
+        // board[0][1] = Some(ChessPiece::new(Piece::Knight, Color::White));
+        // board[0][6] = Some(ChessPiece::new(Piece::Knight, Color::White));
+        // board[7][1] = Some(ChessPiece::new(Piece::Knight, Color::Black));
+        // board[7][6] = Some(ChessPiece::new(Piece::Knight, Color::Black));
 
-        // Set up bishops
-        board[0][2] = Some(ChessPiece::new(Piece::Bishop, Color::White));
-        board[0][5] = Some(ChessPiece::new(Piece::Bishop, Color::White));
-        board[7][2] = Some(ChessPiece::new(Piece::Bishop, Color::Black));
-        board[7][5] = Some(ChessPiece::new(Piece::Bishop, Color::Black));
+        // // Set up bishops
+        // board[0][2] = Some(ChessPiece::new(Piece::Bishop, Color::White));
+        // board[0][5] = Some(ChessPiece::new(Piece::Bishop, Color::White));
+        // board[7][2] = Some(ChessPiece::new(Piece::Bishop, Color::Black));
+        // board[7][5] = Some(ChessPiece::new(Piece::Bishop, Color::Black));
 
-        // Set up queens
-        board[0][3] = Some(ChessPiece::new(Piece::Queen, Color::White));
-        board[7][3] = Some(ChessPiece::new(Piece::Queen, Color::Black));
+        // // Set up queens
+        // board[0][3] = Some(ChessPiece::new(Piece::Queen, Color::White));
+        // board[7][3] = Some(ChessPiece::new(Piece::Queen, Color::Black));
 
-        // Set up kings
-        board[0][4] = Some(ChessPiece::new(Piece::King, Color::White));
-        board[7][4] = Some(ChessPiece::new(Piece::King, Color::Black));
+        // // Set up kings
+        // board[0][4] = Some(ChessPiece::new(Piece::King, Color::White));
+        // board[7][4] = Some(ChessPiece::new(Piece::King, Color::Black));
 
         Board { squares: board }
     }
@@ -65,42 +65,46 @@ impl Board {
         }
     }
 
-    pub fn from_fen(fen: &str) -> Self {
-        let mut board = vec![vec![None; 8]; 8]; // 8x8 chess board
-        let parts: Vec<&str> = fen.split_whitespace().collect();
-        let piece_placement = parts[0];
-        let rows: Vec<&str> = piece_placement.split('/').collect();
+    pub fn from_fen(&mut self, fen: &str) {
+        let rows: Vec<&str> = fen.split('/').collect();
+        if rows.len() != 8 {
+            panic!("Invalid FEN board setup");
+        }
 
-        for (row_idx, row) in rows.iter().enumerate() {
-            let mut col_idx = 0;
-            for ch in row.chars() {
-                if ch.is_digit(10) {
-                    col_idx += ch.to_digit(10).unwrap() as usize;
+        for (i, row) in rows.iter().enumerate() {
+            let mut col = 0;
+            for c in row.chars() {
+                if c.is_digit(10) {
+                    // If the character is a number, it represents empty squares
+                    let empty_squares = c.to_digit(10).unwrap();
+                    col += empty_squares as usize;
                 } else {
-                    let (piece, color) = match ch {
-                        'r' => (Piece::Rook, Color::Black),
-                        'n' => (Piece::Knight, Color::Black),
-                        'b' => (Piece::Bishop, Color::Black),
-                        'q' => (Piece::Queen, Color::Black),
-                        'k' => (Piece::King, Color::Black),
-                        'p' => (Piece::Pawn, Color::Black),
-                        'R' => (Piece::Rook, Color::White),
-                        'N' => (Piece::Knight, Color::White),
-                        'B' => (Piece::Bishop, Color::White),
-                        'Q' => (Piece::Queen, Color::White),
-                        'K' => (Piece::King, Color::White),
-                        'P' => (Piece::Pawn, Color::White),
-                        _ => panic!("Invalid FEN character: {}", ch),
-                    };
-                    board[row_idx][col_idx] = Some(ChessPiece::new(piece, color));
-                    col_idx += 1;
+                    // Otherwise, it's a piece
+                    let (piece, color) = self.char_to_piece(c);
+                    self.squares[i][col] = Some(ChessPiece::new(piece, color));
+                    col += 1;
                 }
             }
         }
-
-        Board { squares: board }
     }
 
+    fn char_to_piece(&self, c: char) -> (Piece, Color) {
+        match c {
+            'r' => (Piece::Rook, Color::Black),
+            'n' => (Piece::Knight, Color::Black),
+            'b' => (Piece::Bishop, Color::Black),
+            'q' => (Piece::Queen, Color::Black),
+            'k' => (Piece::King, Color::Black),
+            'p' => (Piece::Pawn, Color::Black),
+            'R' => (Piece::Rook, Color::White),
+            'N' => (Piece::Knight, Color::White),
+            'B' => (Piece::Bishop, Color::White),
+            'Q' => (Piece::Queen, Color::White),
+            'K' => (Piece::King, Color::White),
+            'P' => (Piece::Pawn, Color::White),
+            _ => panic!("Invalid piece character in FEN"),
+        }
+    }
     pub fn pretty_print(&self) {
         println!(" +------------------------+");
         for (i, row) in self.squares.iter().enumerate() {
