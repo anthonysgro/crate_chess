@@ -30,9 +30,9 @@ impl ChessPiece {
         ChessPiece { piece_type, color }
     }
 
-    pub fn get_possible_moves(&self, origin_tile: Tile, board: &Board, castling_rights: CastlingRights) -> Vec<Move> {
+    pub fn get_possible_moves(&self, origin_tile: Tile, board: &Board, castling_rights: CastlingRights, en_passant_target: Option<Tile>) -> Vec<Move> {
         match self.piece_type {
-            Piece::Pawn => self.get_pawn_moves(origin_tile, board),
+            Piece::Pawn => self.get_pawn_moves(origin_tile, board, en_passant_target),
             Piece::Knight => self.get_knight_moves(origin_tile, board),
             Piece::Rook => self.get_rook_moves(origin_tile, board),
             Piece::Bishop => self.get_bishop_moves(origin_tile, board),
@@ -41,7 +41,7 @@ impl ChessPiece {
         }
     }
 
-    fn get_pawn_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
+    fn get_pawn_moves(&self, origin_tile: Tile, board: &Board, en_passant_target: Option<Tile>) -> Vec<Move> {
         let mut moves= Vec::new();
         let (x, y) = origin_tile.get_coords();
 
@@ -138,6 +138,17 @@ impl ChessPiece {
                         let pawn_move: Move = Move::new(origin_tile, *destination_tile, *self, None);
                         moves.push(pawn_move);
                     }
+                }
+            }
+        }
+
+        // En passant logic
+        if let Some(en_passant_tile) = en_passant_target {
+            let (en_passant_x, en_passant_y) = en_passant_tile.get_coords();
+            if (x as isize - en_passant_x as isize).abs() == 1 && en_passant_y == (y as isize + direction).try_into().unwrap() {
+                let destination_tile = *board.get_tile(en_passant_x, en_passant_y);
+                if !destination_tile.is_occupied() {
+                    moves.push(Move::new(origin_tile, destination_tile, *self, None));
                 }
             }
         }
@@ -306,10 +317,8 @@ impl ChessPiece {
         // Castling logic
         match self.color {
             Color::White => {
-                println!("King white castling");
                 // Kingside castling
                 if castling_rights.white_king_side {
-                    println!("White kingside castle");
                     let rook_tile = board.get_tile(7, y);
                     if rook_tile.is_occupied() {
                         let square_5 = *board.get_tile(5, y);
