@@ -7,7 +7,7 @@ mod castling_rights;
 mod tile;
 
 fn main() {
-    let fen = "r1bqk2r/ppp2ppp/2nb4/1B1np3/4P3/2N2N2/PP1P1PPP/R1BQK2R b KQkq e5 0 7";
+    let fen = "rnbqkbnr/ppp1pppp/8/8/2PpP3/5P2/PP1P2PP/RNBQKBNR b KQkq c3 0 3";
 
     // Create a new Chess game with a board from the provided FEN string
     let game = chess::Chess::from_fen(fen);
@@ -21,4 +21,12 @@ fn main() {
     println!("En Passant Target: {:?}", game.en_passant_target);
     println!("Halfmove Clock: {}", game.halfmove_clock);
     println!("Fullmove Number: {}", game.fullmove_number);
+    println!("Legal moves: {:?}", game.get_legal_moves());
+
+    for tile in game.board.position.iter() {
+        if let Some(piece) = tile.piece {
+            println!("Piece: {:?} at {} at {:?}", piece, tile.name, tile.get_coords());
+        }
+    }
+
 }

@@ -3,7 +3,7 @@ use std::fmt;
 
 #[derive(Debug, Clone, Copy)]
 pub struct TileName {
-    pub name: u8,
+    pub idx: u8,
 }
 
 impl TileName {
@@ -12,21 +12,25 @@ impl TileName {
         let file = name.next().unwrap() as u8 - 'a' as u8;
         let rank = name.next().unwrap() as u8 - '1' as u8;
         TileName {
-            name: file + rank * 8,
+            idx: file + rank * 8,
         }
     }
 
-    pub fn get_name(&self) -> String {
-        let file = (self.name % 8 + 'a' as u8) as u8 as char;
-        let rank = (self.name / 8 + '1' as u8) as u8 as char;
+    pub fn get_name(&self) -> u8 {
+        self.idx
+    }
+
+    pub fn get_notation_name(&self) -> String {
+        let file = (self.idx % 8 + 'a' as u8) as u8 as char;
+        let rank = (self.idx / 8 + '1' as u8) as u8 as char;
         format!("{}{}", file, rank)
     }
 }
 
 impl fmt::Display for TileName {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let file = (self.name % 8 + 'a' as u8) as u8 as char;
-        let rank = (self.name / 8 + '1' as u8) as u8 as char;
+        let file = (self.idx % 8 + 'a' as u8) as u8 as char;
+        let rank = (self.idx / 8 + '1' as u8) as u8 as char;
         write!(f, "{}{}", file, rank)
     }
 }
@@ -67,14 +71,22 @@ impl Tile {
         self.piece = None;
     }
 
+    pub fn get_coords(&self) -> (usize, usize) {
+        let x = (self.name.idx % 8) as usize;
+        let y = (self.name.idx / 8) as usize;
+        (x, y)
+    }
+
 }
 
 impl fmt::Display for Tile {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "{}",
-            self.name, 
+            "Tile {{ piece: {:?}, en_passant_available: {}, name: {} }}", 
+          self.piece, 
+          self.en_passant_available,
+          self.name
         )
     }
 }

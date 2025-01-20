@@ -7,9 +7,7 @@ pub struct Board {
 }
 
 impl Board {
-
-    // Helper function to convert (x, y) coordinates to array index
-    fn index(x: usize, y: usize) -> usize {
+    pub fn index(x: usize, y: usize) -> usize {
         y * 8 + x    
     }
 
@@ -29,7 +27,8 @@ impl Board {
         let file = name.chars().next().unwrap();  // 'a' to 'h'
         let rank = name.chars().nth(1).unwrap(); // '1' to '8'
         let x = file as usize - 'a' as usize;
-        let y = 8 - rank.to_digit(10).unwrap() as usize;
+        let y = (rank.to_digit(10).unwrap() - 1) as usize;
+        println!("x: {}, y: {}", x, y);
     
         if x >= 8 || y >= 8 {
             panic!("Invalid coordinates for tile: {}", name);
