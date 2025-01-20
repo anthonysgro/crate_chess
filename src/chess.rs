@@ -2,6 +2,7 @@ use crate::board::Board;
 use crate::pieces::Color;
 use crate::fen::Fen;
 use crate::castling_rights::CastlingRights;
+use crate::tile::Tile;
 
 const WHITE: &str = "w";
 const BLACK: &str = "b";
@@ -10,6 +11,7 @@ pub struct Chess {
     pub board: Board,
     pub turn: Color,
     pub castling_rights: CastlingRights,
+    pub en_passant_target: Option<Tile>,
 }
 
 impl Chess {
@@ -19,6 +21,7 @@ impl Chess {
             board: Board::init(),
             turn: Color::White,
             castling_rights: CastlingRights::default(),
+            en_passant_target: None,
         }
     }
 
@@ -28,6 +31,7 @@ impl Chess {
             board: Board::default(),
             turn: Color::White,
             castling_rights: CastlingRights::default(),
+            en_passant_target: None,
         }
     }
 
@@ -37,14 +41,19 @@ impl Chess {
         let parts: Vec<&str> = fen.split_whitespace().collect();
         
         if valid_fen == true {
+            let board = Board::from_fen(parts[0]);
             Chess {
-                board: Board::from_fen(parts[0]),
+                board: board,
                 turn: match parts[1] {
                     WHITE => Color::White,
                     BLACK => Color::Black,
                     _ => panic!("Invalid turn color in FEN"),
                 },
                 castling_rights: CastlingRights::from_rights(parts[2]),
+                en_passant_target: match parts[3] {
+                    "-" => None,
+                    _ => Some(*board.get_tile_with_name(parts[3])),
+                },
             }
         } else {
             panic!("Invalid FEN format");

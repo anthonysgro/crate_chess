@@ -17,5 +17,5 @@ fn main() {
     game.board.pretty_print();
 
     println!("Turn: {:?}", game.get_turn());
-    println!("Castling Rights: {:?}", game.castling_rights);
+    println!("{:?}", game.castling_rights);
 }

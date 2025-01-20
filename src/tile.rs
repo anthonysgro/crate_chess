@@ -1,18 +1,49 @@
 use crate::pieces::ChessPiece;
+use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
+pub struct TileName {
+    pub name: u8,
+}
+
+impl TileName {
+    pub fn new(name: &str) -> Self {
+        let mut name = name.chars();
+        let file = name.next().unwrap() as u8 - 'a' as u8;
+        let rank = name.next().unwrap() as u8 - '1' as u8;
+        TileName {
+            name: file + rank * 8,
+        }
+    }
+
+    pub fn get_name(&self) -> String {
+        let file = (self.name % 8 + 'a' as u8) as u8 as char;
+        let rank = (self.name / 8 + '1' as u8) as u8 as char;
+        format!("{}{}", file, rank)
+    }
+}
+
+impl fmt::Display for TileName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let file = (self.name % 8 + 'a' as u8) as u8 as char;
+        let rank = (self.name / 8 + '1' as u8) as u8 as char;
+        write!(f, "{}{}", file, rank)
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
 pub struct Tile {
     pub piece: Option<ChessPiece>,
     pub en_passant_available: bool,
-    pub name: String,
+    pub name: TileName,
 }
 
 impl Tile {
-    pub fn new(piece: Option<ChessPiece>, name: String) -> Self {
+    pub fn new(piece: Option<ChessPiece>, name: &str) -> Self {
         Tile {
             piece,
             en_passant_available: false,
-            name,
+            name: TileName::new(name),
         }
     }
 
@@ -36,4 +67,14 @@ impl Tile {
         self.piece = None;
     }
 
+}
+
+impl fmt::Display for Tile {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.name, 
+        )
+    }
 }

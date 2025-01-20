@@ -1,70 +1,97 @@
 use crate::pieces::{ChessPiece, Piece, Color};
 use crate::tile::Tile;
 
+#[derive(Debug, Clone, Copy)]
 pub struct Board {
-    pub position: Vec<Vec<Tile>>,
+    pub position: [Tile; 64], // Fixed-size array for the board
 }
 
 impl Board {
 
-    pub fn init() -> Self {
-        let mut board: Vec<Vec<Tile>> = Vec::with_capacity(8);
+    // Helper function to convert (x, y) coordinates to array index
+    fn index(x: usize, y: usize) -> usize {
+        y * 8 + x    
+    }
+
+    pub fn get_tile(&self, x: usize, y: usize) -> &Tile {
+        &self.position[Self::index(x, y)]
+    }
     
-        for row in 0..8 {
-            let mut row_tiles: Vec<Tile> = Vec::with_capacity(8);
-            for col in 0..8 {
-                // Generate name for the tile
-                let name = format!("{}{}", (col as u8 + b'a') as char, row + 1); // Name like "a1", "b2", etc.
-                let tile = Tile::new(None, name); // Empty tile
-                row_tiles.push(tile);
+    pub fn get_tile_mut(&mut self, x: usize, y: usize) -> &mut Tile {
+        &mut self.position[Self::index(x, y)]
+    }
+
+    // Function to get the tile by its name (e.g., "a1", "h8")
+    pub fn get_tile_with_name(&self, name: &str) -> &Tile {
+        if name.len() != 2 {
+            panic!("Invalid tile name");
+        }
+    
+        let file = name.chars().next().unwrap();  // 'a' to 'h'
+        let rank = name.chars().nth(1).unwrap(); // '1' to '8'
+        let x = file as usize - 'a' as usize;
+        let y = 8 - rank.to_digit(10).unwrap() as usize;
+    
+        if x >= 8 || y >= 8 {
+            panic!("Invalid coordinates for tile: {}", name);
+        }
+    
+        &self.position[Self::index(x, y)]
+    }
+
+    // Initialize the board with empty tiles and proper names
+    pub fn init() -> Self {
+        let mut position: [Tile; 64] = [Tile::new(None, "a1"); 64];
+        
+        for y in 0..8 {
+            for x in 0..8 {
+                let file = (b'a' + x as u8) as char; // 'a' to 'h'
+                let rank = y + 1; // '1' to '8'
+                let name = format!("{}{}", file, rank); // e.g., "a8", "b8", ..., "h1"
+                position[Self::index(x, y)] = Tile::new(None, &name);
             }
-            board.push(row_tiles);
         }
 
-        Board { position: board }
+        Self { position }
     }
+
 
     // Create a new board with the default starting position
     pub fn default() -> Self {
-        let mut board: Vec<Vec<Tile>> = Board::init().position;
-
+        let mut board: Board = Self::init();
+        
         // Set up the default starting pieces
         for i in 0..8 {
-            board[1][i].set_piece(ChessPiece::new(Piece::Pawn, Color::White));
-            board[6][i].set_piece(ChessPiece::new(Piece::Pawn, Color::Black));
+            board.get_tile_mut(i, 1).set_piece(ChessPiece::new(Piece::Pawn, Color::White));
+            board.get_tile_mut(i, 6).set_piece(ChessPiece::new(Piece::Pawn, Color::Black));
         }
 
-        // Set up other pieces (Rooks, Knights, Bishops, Queens, Kings)
-        board[0][0].set_piece(ChessPiece::new(Piece::Rook, Color::White));
-        board[0][7].set_piece(ChessPiece::new(Piece::Rook, Color::White));
-        board[7][0].set_piece(ChessPiece::new(Piece::Rook, Color::Black));
-        board[7][7].set_piece(ChessPiece::new(Piece::Rook, Color::Black));
-        
-        // Set up knights
-        board[0][1].set_piece(ChessPiece::new(Piece::Knight, Color::White));
-        board[0][6].set_piece(ChessPiece::new(Piece::Knight, Color::White));
-        board[7][1].set_piece(ChessPiece::new(Piece::Knight, Color::Black));
-        board[7][6].set_piece(ChessPiece::new(Piece::Knight, Color::Black));
+        board.get_tile_mut(0, 0).set_piece(ChessPiece::new(Piece::Rook, Color::White));
+        board.get_tile_mut(7, 0).set_piece(ChessPiece::new(Piece::Rook, Color::White));
+        board.get_tile_mut(0, 7).set_piece(ChessPiece::new(Piece::Rook, Color::Black));
+        board.get_tile_mut(7, 7).set_piece(ChessPiece::new(Piece::Rook, Color::Black));
 
-        // Set up bishops
-        board[0][2].set_piece(ChessPiece::new(Piece::Bishop, Color::White));
-        board[0][5].set_piece(ChessPiece::new(Piece::Bishop, Color::White));
-        board[7][2].set_piece(ChessPiece::new(Piece::Bishop, Color::Black));
-        board[7][5].set_piece(ChessPiece::new(Piece::Bishop, Color::Black));
+        board.get_tile_mut(1, 0).set_piece(ChessPiece::new(Piece::Knight, Color::White));
+        board.get_tile_mut(6, 0).set_piece(ChessPiece::new(Piece::Knight, Color::White));
+        board.get_tile_mut(1, 7).set_piece(ChessPiece::new(Piece::Knight, Color::Black));
+        board.get_tile_mut(6, 7).set_piece(ChessPiece::new(Piece::Knight, Color::Black));
+
+        board.get_tile_mut(2, 0).set_piece(ChessPiece::new(Piece::Bishop, Color::White));
+        board.get_tile_mut(5, 0).set_piece(ChessPiece::new(Piece::Bishop, Color::White));
+        board.get_tile_mut(2, 7).set_piece(ChessPiece::new(Piece::Bishop, Color::Black));
+        board.get_tile_mut(5, 7).set_piece(ChessPiece::new(Piece::Bishop, Color::Black));
+
+        board.get_tile_mut(3, 0).set_piece(ChessPiece::new(Piece::Queen, Color::White));
+        board.get_tile_mut(3, 7).set_piece(ChessPiece::new(Piece::Queen, Color::Black));
+
+        board.get_tile_mut(4, 0).set_piece(ChessPiece::new(Piece::King, Color::White));
+        board.get_tile_mut(4, 7).set_piece(ChessPiece::new(Piece::King, Color::Black));
         
-        // Set up queens
-        board[0][3].set_piece(ChessPiece::new(Piece::Queen, Color::White));
-        board[7][3].set_piece(ChessPiece::new(Piece::Queen, Color::Black));
-        
-        // Set up kings
-        board[0][4].set_piece(ChessPiece::new(Piece::King, Color::White));
-        board[7][4].set_piece(ChessPiece::new(Piece::King, Color::Black));
-        
-        Board { position: board }
+        Self { position: board.position }
     }
 
     pub fn from_fen(fen: &str) -> Self {
-        let mut board: Vec<Vec<Tile>> = Board::init().position;
+        let mut board: Board = Self::init();
     
         let rows: Vec<&str> = fen.split('/').collect();
         if rows.len() != 8 {
@@ -97,33 +124,39 @@ impl Board {
                         _ => panic!("Invalid piece character in FEN"),
                     };
                     // Insert the piece into the correct position in the board
-                    board[i][col].set_piece(ChessPiece::new(piece, color));
+                    let x = col;
+                    let y = i; // Reverse to match board's visual layout
+
+                    // Use index(x, y) to access the position in the fixed array
+                    board.get_tile_mut(x, y).set_piece(ChessPiece::new(piece, color));
+    
                     col += 1;
                 }
             }
         }
-        Board { position: board }
+        board
     }
     
+
+
     pub fn pretty_print(&self) {
         println!(" +------------------------+");
-    
-        // Iterate through the rows in reverse order (from bottom to top)
-        for row in self.position.iter().rev().enumerate() {
-            let (i, row) = row;
-            print!("{}|", 8 - i); // Row numbers (8 at the bottom, 1 at the top)
-            for tile in row {
+        for y in (0..8).rev() { // Print from row 8 down to row 1
+            print!("{} |", y + 1); // Row numbers
+            for x in 0..8 {
+                let tile = &self.position[Self::index(x, y)];
                 match &tile.piece {
                     Some(piece) => print!(" {:<2}", self.piece_to_unicode(piece)),
-                    None => print!(" . "),
+                    None => print!(" . "), // Empty tile representation
+                    // None => print!(" {:<5} ", tile),  // Uses the Display trait for tile name
                 }
             }
             println!("|");
         }
-    
         println!(" +------------------------+");
-        println!("   a  b  c  d  e  f  g  h");
+        println!("   a  b  c  d  e  f  g  h"); // Column labels
     }
+
     fn piece_to_unicode(&self, piece: &ChessPiece) -> char {
         match piece.piece_type {
             Piece::King => match piece.color {
