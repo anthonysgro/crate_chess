@@ -21,7 +21,6 @@ impl Board {
         &mut self.position[Self::index(x, y)]
     }
 
-    // Function to get the tile by its name (e.g., "a1", "h8")
     pub fn get_tile_with_name(&self, name: &str) -> &Tile {
         if name.len() != 2 {
             panic!("Invalid tile name");
@@ -38,6 +37,24 @@ impl Board {
     
         &self.position[Self::index(x, y)]
     }
+
+    pub fn get_tile_with_name_mut(&mut self, name: &str) -> &mut Tile {
+        if name.len() != 2 {
+            panic!("Invalid tile name");
+        }
+    
+        let file = name.chars().next().unwrap();  // 'a' to 'h'
+        let rank = name.chars().nth(1).unwrap(); // '1' to '8'
+        let x = file as usize - 'a' as usize;
+        let y = 8 - rank.to_digit(10).unwrap() as usize;
+    
+        if x >= 8 || y >= 8 {
+            panic!("Invalid coordinates for tile: {}", name);
+        }
+    
+        &mut self.position[Self::index(x, y)]
+    }
+
 
     // Initialize the board with empty tiles and proper names
     pub fn init() -> Self {
@@ -90,10 +107,10 @@ impl Board {
         Self { position: board.position }
     }
 
-    pub fn from_fen(fen: &str) -> Self {
+    pub fn from_fen(fen_board: &str, fen_en_passant: &str) -> Self {
         let mut board: Board = Self::init();
     
-        let rows: Vec<&str> = fen.split('/').collect();
+        let rows: Vec<&str> = fen_board.split('/').collect();
         if rows.len() != 8 {
             panic!("Invalid FEN board setup");
         }
@@ -134,6 +151,9 @@ impl Board {
                 }
             }
         }
+
+        board.get_tile_with_name_mut(fen_en_passant).set_en_passant_available(true);
+
         board
     }
     

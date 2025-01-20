@@ -4,14 +4,13 @@ use crate::fen::Fen;
 use crate::castling_rights::CastlingRights;
 use crate::tile::Tile;
 
-const WHITE: &str = "w";
-const BLACK: &str = "b";
-
 pub struct Chess {
     pub board: Board,
     pub turn: Color,
     pub castling_rights: CastlingRights,
     pub en_passant_target: Option<Tile>,
+    pub halfmove_clock: u8,
+    pub fullmove_number: u8,
 }
 
 impl Chess {
@@ -22,6 +21,8 @@ impl Chess {
             turn: Color::White,
             castling_rights: CastlingRights::default(),
             en_passant_target: None,
+            fullmove_number: 1,
+            halfmove_clock: 0,
         }
     }
 
@@ -32,34 +33,32 @@ impl Chess {
             turn: Color::White,
             castling_rights: CastlingRights::default(),
             en_passant_target: None,
+            fullmove_number: 1,
+            halfmove_clock: 0,
         }
     }
 
     // Create a new Chess game from a FEN string
     pub fn from_fen(fen: &str) -> Self {
-        let valid_fen: bool = Fen::validate_fen(fen);
-        let parts: Vec<&str> = fen.split_whitespace().collect();
+        let fen: Fen = Fen::from_fen(fen);
         
-        if valid_fen == true {
-            let board = Board::from_fen(parts[0]);
-            Chess {
-                board: board,
-                turn: match parts[1] {
-                    WHITE => Color::White,
-                    BLACK => Color::Black,
-                    _ => panic!("Invalid turn color in FEN"),
-                },
-                castling_rights: CastlingRights::from_rights(parts[2]),
-                en_passant_target: match parts[3] {
-                    "-" => None,
-                    _ => Some(*board.get_tile_with_name(parts[3])),
-                },
-            }
-        } else {
-            panic!("Invalid FEN format");
+        let board = Board::from_fen(&fen.board, &fen.en_passant);
+        Chess {
+            board,
+            turn: match &fen.turn {
+                'w' => Color::White,
+                'b' => Color::Black,
+                _ => panic!("Invalid turn color in FEN"),
+            },
+            castling_rights: CastlingRights::from_rights(&fen.castling),
+            en_passant_target: match fen.en_passant.as_str() {
+                "-" => None,
+                _ => Some(*board.get_tile_with_name(&fen.en_passant)),
+            },
+            halfmove_clock: fen.halfmove_clock,
+            fullmove_number: fen.fullmove_number,
         }
     }
-
 
     pub fn get_turn(&self) -> Color {
         self.turn
