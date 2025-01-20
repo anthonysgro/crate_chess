@@ -29,7 +29,6 @@ impl Chess {
 
     // Create a new Chess game from a FEN string
     pub fn from_fen(fen: &str) -> Self {
-        // Validate FEN
         let valid_fen: bool = Fen::validate_fen(fen);
         let parts: Vec<&str> = fen.split_whitespace().collect();
         
