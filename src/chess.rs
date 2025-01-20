@@ -1,5 +1,9 @@
 use crate::board::Board;
 use crate::pieces::{Color, ChessPiece};
+use crate::fen::Fen;
+
+const WHITE: &str = "w";
+const BLACK: &str = "b";
 
 pub struct Chess {
     pub board: Board,
@@ -7,13 +11,42 @@ pub struct Chess {
 }
 
 impl Chess {
-    pub fn new() -> Self {
-        // Create a new Chess game, starting with a default board and White to move
+    // Create a new Chess game, starting with an empty board and White to move
+    pub fn empty() -> Self {
         Chess {
             board: Board::new(),
             turn: Color::White,
         }
     }
+
+    // Create a new Chess game, starting with a default board and White to move
+    pub fn default() -> Self {
+        Chess {
+            board: Board::default(),
+            turn: Color::White,
+        }
+    }
+
+    // Create a new Chess game from a FEN string
+    pub fn from_fen(fen: &str) -> Self {
+        // Validate FEN
+        let valid_fen: bool = Fen::validate_fen(fen);
+        let parts: Vec<&str> = fen.split_whitespace().collect();
+        
+        if valid_fen == true {
+            Chess {
+                board: Board::from_fen(parts[0]),
+                turn: match parts[1] {
+                    WHITE => Color::White,
+                    BLACK => Color::Black,
+                    _ => panic!("Invalid turn color in FEN"),
+                },
+            }
+        } else {
+            panic!("Invalid FEN format");
+        }
+    }
+
 
     pub fn get_turn(&self) -> Color {
         self.turn
@@ -35,34 +68,6 @@ impl Chess {
         self.switch_turn();
 
         Ok(())
-    }
-
-    // Create a new Chess game and set up the board and turn from FEN
-    pub fn from_fen(fen: &str) -> Self {
-
-        // Validate FEN
-        let parts: Vec<&str> = fen.split_whitespace().collect();
-        if parts.len() != 6 {
-            panic!("Invalid FEN format");
-        }
-    
-        // Initialize the Chess game properties
-        let mut game = Chess {
-            board: Board::new(), // Start with a default board
-            turn: Color::White,  // Default turn (White)
-        };
-    
-        // Set up the board from the FEN string
-        game.board.from_fen(parts[0]);
-    
-        // Determine whose turn it is based on FEN
-        game.turn = match parts[1] {
-            "w" => Color::White,
-            "b" => Color::Black,
-            _ => panic!("Invalid turn color in FEN"),
-        };
-    
-        game
     }
 
     // Additional methods for game state management (check, checkmate, win condition, etc.)
