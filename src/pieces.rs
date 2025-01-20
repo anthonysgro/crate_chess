@@ -312,7 +312,6 @@ impl ChessPiece {
                     println!("White kingside castle");
                     let rook_tile = board.get_tile(7, y);
                     if rook_tile.is_occupied() {
-                        // Check if the squares between the king and rook are empty
                         let square_5 = *board.get_tile(5, y);
                         let square_6 = *board.get_tile(6, y);
                         if !square_5.is_occupied() && !square_6.is_occupied() {
@@ -325,7 +324,6 @@ impl ChessPiece {
                 if castling_rights.white_queen_side {
                     let rook_tile = board.get_tile(0, y);
                     if rook_tile.is_occupied() {
-                        // Check if the squares between the king and rook are empty
                         let square_1 = *board.get_tile(1, y);
                         let square_2 = *board.get_tile(2, y);
                         let square_3 = *board.get_tile(3, y);

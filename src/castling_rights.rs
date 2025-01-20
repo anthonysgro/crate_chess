@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 #[derive(Debug, Clone, Copy)]
 pub struct CastlingRights {
     pub white_king_side: bool,
