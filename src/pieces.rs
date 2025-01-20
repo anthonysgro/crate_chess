@@ -217,13 +217,51 @@ impl ChessPiece {
 
     fn get_bishop_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
         let mut moves: Vec<Move>= Vec::new();
-        moves
+        let (x, y) = origin_tile.get_coords();
 
-        // Bishop-specific move logic
+        // Diagonal Directions
+        let directions: [(isize, isize); 4] = [
+            (1, 1),    // Down-Right
+            (-1, 1),   // Down-Left
+            (1, -1),   // Up-Right
+            (-1, -1),  // Up-Left
+        ];
+
+        for (dx, dy) in directions.iter() {
+            let mut new_x = x as isize;
+            let mut new_y = y as isize;
+
+            // Move in the current direction until hitting the edge or another piece
+            loop {
+                new_x += dx;
+                new_y += dy;
+
+                if !board.is_on_board(new_x as usize, new_y as usize) {
+                    break;
+                }
+
+                let destination_tile = board.get_tile(new_x as usize, new_y as usize);
+
+                if destination_tile.is_occupied() {
+                    if destination_tile.piece.unwrap().color != self.color {
+                        let bishop_move = Move::new(origin_tile, *destination_tile, *self, None);
+                        moves.push(bishop_move);
+                    }
+                    break;
+                } else {
+                    let bishop_move = Move::new(origin_tile, *destination_tile, *self, None);
+                    moves.push(bishop_move);
+                }
+            }
+        }
+
+        moves
     }
 
     fn get_queen_moves(&self, origin_tile: Tile, board: &Board) -> Vec<Move> {
         let mut moves: Vec<Move>= Vec::new();
+        moves.extend(self.get_rook_moves(origin_tile, board));
+        moves.extend(self.get_bishop_moves(origin_tile, board));
         moves
 
         // Queen-specific move logic
